@@ -1,18 +1,29 @@
-function [Mean,STD, positions, R, v] = cornerCalibration(varargin)
+function [Mean,STD, positions, R, v, meanR, meanV] = cornerCalibration(varargin)
 %CORNERCALIBRATION - Calculates the positions of the corners of the
 %force plate.
-%   INPUT -
-%   OUTPUT -
-%Mean = 4 x 3 matrix containing the positions of each corner
-%STD = 4 x 3 matrix containing standard deviation of each coordinate,
-%   calculated using the data for all markers
-%positions = 4 x 3 x N matrix, where N is the number of recordings,
-%   containing the positions of the corners in each recording
-%R = 3 x 3 x N matrix containing the rotation matrix that maps the global
-%   reference frame to the force plate coordinate system
-%v = 1 x 3 x N matrix containing the translation vector that contains the
-%   position of the force plate coordinate system, expressed in the global
-%   coordinate system.
+%The script will ask the user to select a file where the recording of the
+%corners is stored. The markers must be numbered (in a clockwise direction
+%around the force plate, starting in the +X, +Y corner - 3, 2, 1, 4)
+%
+% Syntax:  [~, ~, ~, R, V ] = cornerCalibration('C:/')
+% Syntax:  [~, ~, ~, R, V ] = cornerCalibration('C:/', 9)
+
+% Inputs:
+%    path - the path to the base directory where the file selection window
+%    will be opened
+%    markerOffset - the offset in mm from the top of the force plate to the
+%    center of the markers. If nothing is entered, 7mm is used by default.
+% Outputs: 
+%    Mean = 4 x 3 matrix containing the positions of each corner
+%    STD = 4 x 3 matrix containing standard deviation of each coordinate,
+%       calculated using the data for all markers
+%    positions = 4 x 3 x N matrix, where N is the number of recordings,
+%       containing the positions of the corners in each recording
+%    R = 3 x 3 x N matrix containing the rotation matrix that maps the global
+%       reference frame to the force plate coordinate system
+%    v = 1 x 3 x N matrix containing the translation vector that contains the
+%       position of the force plate coordinate system, expressed in the global
+%       coordinate system.
 markerHeight = 7;
 path = varargin{1};
 if(nargin == 2)
@@ -101,6 +112,22 @@ v = v - [0 0 markerHeight];
 Mean = mean(meanPositions,3) - [0 0 markerHeight];
 STD = std(meanPositions,0,3);
 positions = meanPositions - [0 0 markerHeight];
+[meanR, meanV]  = getTransformation(recording, rec, mean(meanPositions,3));
+
+    function [x, y, z] = getRotation(x1, x2, y1, y2)
+        %vector parallel to x,y axis = positive side - negative side
+        xAxis = x1 - x2;
+        yAxis = y1 - y2;
+        
+        %perform Gram Schmidt to orthogonalize x axis and y axis
+        yOrthogonal = yAxis - projVector(yAxis,xAxis);
+        
+        %Find z axis = cross(x,y)
+        zAxis = cross(xAxis,yOrthogonal);
+        x = xAxis./norm(xAxis);
+        y = yOrthogonal./norm(yOrthogonal);
+        z = zAxis./norm(zAxis);
+    end
 
     function proj = projVector(v1, v2)
         %PROJVECTOR - projection of v1 onto v2

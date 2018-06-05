@@ -1,7 +1,20 @@
-function [ startFrames, endFrames ] = getCalibrationFrames( COP )
-%UNTITLED3 Summary of this function goes here
-%   Detailed explanation goes here
-
+function [startFrames, endFrames] = getCalibrationFrames(COP)
+%GET_CALIBRATION_FRAMES - Segments a recording into multiple shorter
+%measurements.
+%Segments a recording into shorter measurements by analyzing the movement
+%of the tip of the pole. If this movement is below a threshold, it is part
+%of a measurement
+%
+% Syntax:  [startFrames, endFrames] = getCalibrationFrames(COP)
+%
+% Inputs:
+%    COP - the position of the tip of the instrumented pole (3 x 1 x N)
+%
+% Outputs:
+%    startFrames - a 1 x M vector, containing the starts of each possible
+%    measurements
+%    endFrames - a 1 x M vector, containing the end frames of each possible
+%    measurements
 
 %% Parameters
 threshold = 0.9; %Maximum (filtered) movement across each frame. If the 

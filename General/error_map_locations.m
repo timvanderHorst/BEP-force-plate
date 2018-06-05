@@ -1,4 +1,8 @@
-function testLocations = errorMap(varargin)
+function testLocations = error_map_locations(varargin)
+%ERROR_MAP_LOCATIONS - export the locations of the standard procedure used
+%to evaluate the accuracy of the force plate.
+% Inputs
+    %any input means the map for force plate A will be exported.
 if(nargin ~= 0)
     ySize = 600;
 else

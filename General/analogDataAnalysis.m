@@ -1,6 +1,7 @@
-function [COP,force] = analogDataAnalysis(data, az0)
+function [COP,force] = analogDataAnalysis(plate, data, az0)
 %ANALOGDATA - converts the analog voltages to a COP and force components
 %   INPUT - 
+%plate - plate name ('a', 'c')
 %data - N x 8 matrix containing analog data for a force plate
 %   OUTPUT - 
 %COP - N x 3 matrix with COP locations in force plate reference frame
@@ -11,14 +12,15 @@ function [COP,force] = analogDataAnalysis(data, az0)
 
 %Define force plate sizes
 a = 210;        %Distance in x direction from origin -> transducer
-b = 108.25;     %Distance in y directon from origin -> transducer
-%b = 260;       %Force Plate A
 
-%Sensitivity matrix, range 1
-%S = [39.178, 39.423, 39.422, 39.398, 18.570, 18.573, 18.506, 18.432];
-S = [3.921, 3.948, 3.953, 3.949, 1.869, 1.868, 1.861, 1.854]; %FP-C
-%S = [3.996, 3.984, 3.990, 4.010, 0.958, 0.959, 0.952, 0.957]; %FP-A
-
+if(lower(plate) == 'a')
+    b = 260;
+    S = [3.996, 3.984, 3.990, 4.010, 0.958, 0.959, 0.952, 0.957]; %sensitivity range 3,4
+elseif(lower(plate) == 'c')
+    b = 108.25;
+    S = [3.921, 3.948, 3.953, 3.949, 1.869, 1.868, 1.861, 1.854]; %sensitivity range 3,4
+end
+    
 %Transform data to V, divide by sensitivity matrix.
 data = 1000*data./S;
 

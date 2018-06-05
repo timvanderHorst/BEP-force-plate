@@ -40,10 +40,8 @@ P = poleTip' - plateThickness*f./cos(theta);
 
 
 x0 = [rotm2eul(rGuess,'ZYZ')';vGuess];
-lb = [-pi, -pi, -pi, -4000, -2000, 45];
-ub = [pi, pi, pi, 4000, 2000, 60];
-options = optimoptions('fmincon','Display','iter','Algorithm','interior-point','FunctionTolerance',1e-12,'ConstraintTolerance',1e-12);
-tEstimate = fmincon( @(T)objective(T, f', ft, P, plateCOP),x0,[],[],[],[],lb,ub,@(T)confuneq(T),options);
+options = optimset('Display','iter');
+tEstimate = fminsearch( @(T)objective(T, f', ft, P, plateCOP),x0, options);
 
 function J = objective(unknowns, fm, ft,Pm,Pt)
     Pm = Pm';
@@ -57,14 +55,6 @@ function J = objective(unknowns, fm, ft,Pm,Pt)
     up = norm(Ep);
     sigmap = sqrt(sum(vecnorm(Pm - (R*Pt + t) - Ep).^2)/N);
     J = (up + sigmap)*(uf + sigmaf);
-end
-
-function [c,ceq] = confuneq(unknowns)
-    R = eul2rotm(unknowns(1:3)','ZYZ');
-    % Nonlinear inequality constraints
-    c = [];
-    % Nonlinear equality constraints
-    ceq = [reshape(R*R' - eye(3),9,1); det(R) - 1]';
 end
 end
 
